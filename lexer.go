@@ -29,19 +29,55 @@ const (
 
 // Lexer 词法分析器
 type Lexer struct {
-	input string
-	pos   int
-	runes []rune
+	input string //输入的文件
+	pos   int    //当作一个指针
+	runes []rune //不知道什么意思
 }
 
 // SetInput 设置输入
 func (l *Lexer) SetInput(s string) {
-	panic("not implemented")
+	//panic("not implemented")
+	l.input = s
 }
 
 // Peek 看下一个字符
 func (l *Lexer) Peek() (ch rune, end bool) {
-	panic("not implemented")
+	//ch 返回的类型值，end 不知道什么意思
+
+	//panic("not implemented")
+	tem := rune(l.input[l.pos])
+	var type0 rune
+	//if end&&isLetterOrUnderscore(tem){
+	//	type0 = TYPE_VAR
+	//}
+	if isLetter(tem) {
+		type0 = TYPE_VAR
+	} else if isNum(tem) {
+		type0 = TYPE_INT
+	} else if tem == '+' {
+		type0 = TYPE_PLUS
+	} else if tem == '-' {
+		type0 = TYPE_SUB
+	} else if tem == '*' {
+		type0 = TYPE_MUL
+	} else if tem == '/' {
+		type0 = TYPE_DIV
+	} else if tem == '(' {
+		type0 = TYPE_LP
+	} else if tem == ')' {
+		type0 = TYPE_RP
+	} else if tem == '>' {
+		type0 = TYPE_LG
+	} else if tem == '<' {
+		type0 = TYPE_SM
+	} else if tem == '!' {
+		type0 = TYPE_NOT
+	} else if tem == '.' {
+		type0 = TYPE_DOT
+	} else {
+		type0 = TYPE_UNKNOWN
+	}
+	return type0, true
 }
 
 // some finction maybe useful for your implementation
