@@ -147,7 +147,7 @@ func (l *Lexer) Scan() (code int, token string, eos bool) {
 	l.runes = l.runes[:0]
 	eos = true
 	if !end {
-		return 404, "", eos
+		return 404, "", false
 	}
 
 	switch tem {
@@ -167,6 +167,14 @@ func (l *Lexer) Scan() (code int, token string, eos bool) {
 		l.pos++
 		token = "*"
 		return TYPE_MUL, token, eos
+	case TYPE_LP:
+		l.pos++
+		token = "("
+		return TYPE_LP, token, eos
+	case TYPE_RP:
+		l.pos++
+		token = ")"
+		return TYPE_RP, token, eos
 	}
 	//+ - * /
 
@@ -178,14 +186,12 @@ func (l *Lexer) Scan() (code int, token string, eos bool) {
 		var tem1 rune
 		tem1, end1 = l.Peek()
 		for end1 && (tem1 == TYPE_INT || tem1 == TYPE_DOT) {
-			tem1, end1 = l.Peek() //获取
-			if end1 && (tem1 == TYPE_INT || tem1 == TYPE_DOT) {
-				if tem1 == TYPE_DOT {
-					dot = 1
-				}
-				l.runes = append(l.runes, rune(l.input[l.pos]))
+			if tem1 == TYPE_DOT {
+				dot = 1
 			}
+			l.runes = append(l.runes, rune(l.input[l.pos]))
 			l.pos++
+			tem1, end1 = l.Peek()
 		}
 		token = string(l.runes)
 		if dot == 1 {
@@ -203,15 +209,14 @@ func (l *Lexer) Scan() (code int, token string, eos bool) {
 		var end1 bool = true
 		tem1, end1 = l.Peek()
 		for end1 && tem1 != TYPE_STR {
-			tem1, end1 = l.Peek()
-			if end1 && tem1 != TYPE_STR {
-				l.runes = append(l.runes, rune(l.input[l.pos]))
-			}
+			l.runes = append(l.runes, rune(l.input[l.pos]))
 			//if tem1 == TYPE_STR {
 			//l.runes = append(l.runes, rune(l.input[l.pos]))
 			//}
 			l.pos++
+			tem1, end1 = l.Peek()
 		}
+		l.pos++
 		token = string(l.runes)
 		return TYPE_STR, token, eos
 	}
@@ -224,11 +229,9 @@ func (l *Lexer) Scan() (code int, token string, eos bool) {
 		var end1 bool = true
 		tem1, end1 = l.Peek()
 		for end1 && (tem1 == TYPE_VAR || tem1 == TYPE_INT) {
-			tem1, end1 = l.Peek()
-			if end1 && (tem1 == TYPE_VAR || tem1 == TYPE_INT) {
-				l.runes = append(l.runes, rune(l.input[l.pos]))
-			}
+			l.runes = append(l.runes, rune(l.input[l.pos]))
 			l.pos++
+			tem1, end1 = l.Peek()
 		}
 		token = string(l.runes)
 		if token == "true" {
