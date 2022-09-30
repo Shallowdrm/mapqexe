@@ -127,14 +127,14 @@ func (l *Lexer) ScanType(code int) (token string, err error) {
 	ck := l.SetCheckpoint()
 	type0, tem, epp := l.Scan()
 	if !epp {
-		return "", errors.New("not found wu")
+		l.GobackTo(ck)
+		return "", errors.New("not found")
 	}
 	if type0 == code {
 		return tem, err
 	} else {
-
 		l.GobackTo(ck)
-		return "", errors.New("not found you")
+		return "", errors.New("not found")
 	}
 
 }
@@ -175,7 +175,13 @@ func (l *Lexer) Scan() (code int, token string, eos bool) {
 		l.pos++
 		token = ")"
 		return TYPE_RP, token, eos
+
+	case TYPE_DOT:
+		l.pos++
+		token = "."
+		return TYPE_DOT, token, eos
 	}
+
 	//+ - * /
 
 	if tem == TYPE_INT {

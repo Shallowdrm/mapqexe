@@ -138,10 +138,32 @@ func (n *BinNode) Eval(data map[string]interface{}) interface{} {
 				return toF64(0)
 			case TYPE_RES_NULL:
 				return toF64(-1)
+			case TYPE_STR:
+				return n.Token
 			case TYPE_VAR:
+
+				if len(n.Token) >= 3 && n.Token[1] == '.' {
+					var elem map[string]interface{}
+					elem, _ = data[string(n.Token[0])].(map[string]interface{})
+					for n.Token[1] == '.' {
+						n.Token = n.Token[2:]
+						c, ok := elem[string(n.Token[0])].(map[string]interface{})
+						if ok {
+							elem = c
+						} else {
+							return toF64(elem[string(n.Token[0])])
+						}
+					}
+				}
+
 				elem, ok := data[n.Token]
 				if ok {
-					return float64(elem.(int))
+					val, ok1 := elem.(string)
+					if ok1 {
+						return val
+					} else {
+						return float64(elem.(int))
+					}
 				} else {
 					return toF64(-1)
 				}

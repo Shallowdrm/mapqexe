@@ -25,7 +25,7 @@ func TestQueryMap(t *testing.T) {
 		{"or true case2", args{map[string]interface{}{"a": 1, "b": 2}, "a==1||b==3"}, true, false},
 		{"or false case", args{map[string]interface{}{"a": 1, "b": 2}, "a<=0||b>3||false"}, false, false},
 		{"LEQ SM case", args{map[string]interface{}{"a": 1, "b": 2}, "a<2&&b>=2"}, true, false},
-		{"nested case", args{map[string]interface{}{"a": 1, "b": 2, "c": map[string]interface{}{"d": 3}}, //WAITING
+		{"nested case", args{map[string]interface{}{"a": 1, "b": 2, "c": map[string]interface{}{"d": 3}}, //WAITING	//RIGHT
 			"a==1&&b==2&&c.d==3"}, true, false},
 		{"NEQ case", args{map[string]interface{}{"a": 1, "b": 2}, "a!=1||b!=2"}, false, false},
 		{"parentheses case", args{map[string]interface{}{"a": 1, "b": 2}, "a==1&&!(b==2||b==3)"}, false, false},
@@ -36,9 +36,12 @@ func TestQueryMap(t *testing.T) {
 		{"div case", args{map[string]interface{}{"a": 3, "b": 2}, "a/b==1.5"}, true, false},                     //WAITING 	//RIGHT
 		{"parentheses mul case", args{map[string]interface{}{"a": 3, "b": 2}, "(a+b)*b==10"}, true, false},      //WAITING	//RIGHT
 		{"parentheses mul false case", args{map[string]interface{}{"a": 3, "b": 2}, "(a+b)*b<5"}, false, false}, //WAITING	//RIGHT
-		{"string case", args{map[string]interface{}{"a": "1", "b": "2"}, "a=='1'&&b=='2'"}, true, false},        //WAITING
+		{"string case", args{map[string]interface{}{"a": "1", "b": "2"}, "a=='1'&&b=='2'"}, true, false},        //WAITING	//RIGHT
 		{"null case", args{map[string]interface{}{"a": 1}, "b==null&&a!=null"}, true, false},
 		{"unary case", args{map[string]interface{}{"a": 1}, "!(a==+1)&&-a==-1"}, false, false}, //WAITING
+
+		//test为自己加的测试，是readme文件开头的样例，可以通过
+		{"test", args{map[string]interface{}{"a": 1, "b": 2, "c": map[string]interface{}{"d": 3}}, "a==1&&b==2&&c.d*(a+b)==9"}, true, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

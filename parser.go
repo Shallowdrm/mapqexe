@@ -22,9 +22,9 @@ func Getlevel(code int) (level int) {
 	} else if code == TYPE_EQ || code == TYPE_LG || code == TYPE_SM || code == TYPE_LEQ || code == TYPE_SEQ || code == TYPE_NEQ {
 		return 2
 	} else if code == TYPE_LP {
-		return 5
-	} else if code == TYPE_RP {
 		return 0
+	} else if code == TYPE_RP {
+		return -1
 	}
 	return 404
 
@@ -72,16 +72,32 @@ func (p *Parser) Parse(str string) (n BinNode, err error) {
 	p.lexer.input = str
 	var Numstack []BinNode
 	var Binstack []BinNode
+	var fintoken string = ""
 
 	for code, token, eos := p.lexer.Scan(); eos; {
 		if code == TYPE_INT || code == TYPE_FLOAT || code == TYPE_VAR || code == TYPE_RES_TRUE ||
 			code == TYPE_RES_FALSE || code == TYPE_RES_NULL || code == TYPE_STR {
-			Numnode := BinNode{Token: token, Diff: 0, Op: code}
-			Numstack = append(Numstack, Numnode)
+			fintoken += token
+			temtoken, err := p.lexer.ScanType(TYPE_DOT)
+			if err == nil {
+				fintoken += temtoken
+			} else {
+				Numnode := BinNode{Token: fintoken, Diff: 0, Op: code}
+				Numstack = append(Numstack, Numnode)
+				fintoken = ""
+			}
 		}
 
 		//code 为 +-*/ () && || == > < >= <= != !
 		if IsOper(token) {
+			if token == "(" {
+				var Binnode BinNode
+				Binnode = BinNode{Op: code, Token: token, Diff: 2}
+				Binstack = append(Binstack, Binnode)
+				code, token, eos = p.lexer.Scan()
+				continue
+			}
+
 			if len(Binstack) == 0 || Getlevel(code) >= Getlevel(Binstack[len(Binstack)-1].Op) { //如果当前token的运算优先级大，则直接入栈
 				var Binnode BinNode
 				if token == "!" {
@@ -96,6 +112,10 @@ func (p *Parser) Parse(str string) (n BinNode, err error) {
 				for len(Binstack) > 0 && Getlevel(code) < Getlevel(Binstack[len(Binstack)-1].Op) { //若小，则栈顶元素pop，左右节点为Num栈的顶二元素，同时Bin1再次入Num栈
 					Bin1 := PopBin(Binstack)
 					Binstack = Binstack[0 : len(Binstack)-1]
+					if token == ")" && Bin1.Token == "(" {
+						break
+					}
+
 					if Bin1.Token == "(" || Bin1.Token == ")" {
 						continue
 					}
@@ -114,6 +134,11 @@ func (p *Parser) Parse(str string) (n BinNode, err error) {
 					}
 
 				}
+				if token == ")" {
+					code, token, eos = p.lexer.Scan()
+					continue
+				}
+
 				var Binnode BinNode
 				if token == "!" {
 					Binnode = BinNode{Op: code, Token: token, Diff: 1}
